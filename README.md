@@ -1,6 +1,6 @@
 # bd-fmb-observation-planner
 
-百度伐谋杯第四题（开运联合）自主观测任务规划：可交接贪心基线、独立校验、站点故障重规划。最新交付继承已有改进方法，完成三个冻结种子的公平对比、较晚故障的历史保护验证及离线HTML回放。见 [E3/E4与Demo交接](docs/IMPROVEMENT_DEMO_HANDOFF.md)。
+百度伐谋杯第四题（开运联合）自主观测任务规划：可交接贪心基线、独立校验、站点故障重规划。最新交付修复实验入口写入封存输入的P1问题，并完成E5同初始计划重规划对照（172.4→182.0，收益9.6分）。见 [P1/E5交接](docs/PATH_SAFETY_E5_HANDOFF.md)；此前多种子和离线演示见 [E3/E4与Demo交接](docs/IMPROVEMENT_DEMO_HANDOFF.md)。
 
 ## 直接运行
 
@@ -22,9 +22,11 @@ $py = 'D:\conda_envs\bd-fmb\python.exe'
 & $py -X utf8 -m pytest tests -q --basetemp=outputs/pytest_new_01
 ```
 
-已有 bd-fmb 环境不需要安装。本轮65项测试通过，开发依赖固定pytest9.1.1；运行仅需requirements.txt。本轮未安装或升级依赖，未做干净环境安装验证。`requirements-lock.txt` 是用户原有完整环境快照，保持原字节和未跟踪状态。每次测试使用新的basetemp。
+已有 bd-fmb 环境不需要安装。最新94项测试通过，开发依赖固定pytest9.1.1；运行仅需requirements.txt。本轮未安装或升级依赖，未做干净环境安装验证。`requirements-lock.txt` 是用户原有完整环境快照，保持原字节和未跟踪状态。每次测试使用新的basetemp。
 
 ## 交付与结果
+
+- [docs/PATH_SAFETY_E5_HANDOFF.md](docs/PATH_SAFETY_E5_HANDOFF.md)：P1修复前后完整目录树证据、E5共同输入哈希与受控结果、专用只读复核及复现命令。
 
 - [docs/IMPROVEMENT_DEMO_HANDOFF.md](docs/IMPROVEMENT_DEMO_HANDOFF.md)：本轮E3/E4实测、600秒预算台账、复现/复查/Demo命令和分项验收。
 - [demo/README.md](demo/README.md)：离线生成器和清晰标注的合成演示；[中文讲稿](docs/DEMO_SCRIPT.md)。
@@ -41,3 +43,5 @@ $py = 'D:\conda_envs\bd-fmb\python.exe'
 真实数据、冻结样本和结果全部在本地忽略目录 `prototype_v1/`、`outputs/`，不提交。缓存绑定原始数据、样本、站点、时域、过滤/采样和版本；算法比较无需重复传播。默认单进程；每案例最多 300 秒，超时终止工作进程树，不自动重试。
 
 每目标一次成功、中断零分、120/240 秒离散得分和海拔近似椭球高属于本轮测试假设；几何仰角不等于完整光学可观测。正式规则与两套评分口径待确认。未收到明确标记的 1 号数据，未声称已与 3 号确认接口。
+
+E5入口为 `scripts/run_replan_e5.py`，两方法共享一份冻结初始计划、历史和候选；其 `--check-only` 是专用只读复核，不套用旧四计划命名。实验根必须全新，台账放在实验根之外（推荐父目录）。E3/E4总入口在任何写入前预检全部输入及台账/日志位置，支持正常相邻输出，拒绝封存源内部写入。

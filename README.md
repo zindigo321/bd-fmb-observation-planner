@@ -1,6 +1,17 @@
 # bd-fmb-observation-planner
 
-百度伐谋杯第四题（开运联合）自主观测任务规划：可交接贪心基线、独立校验、站点故障重规划。最新交付修复实验入口写入封存输入的P1问题，并完成E5同初始计划重规划对照（172.4→182.0，收益9.6分）。见 [P1/E5交接](docs/PATH_SAFETY_E5_HANDOFF.md)；此前多种子和离线演示见 [E3/E4与Demo交接](docs/IMPROVEMENT_DEMO_HANDOFF.md)。
+百度伐谋杯第四题自主观测任务规划。当前交付是基于算法候选`b0eb3b5`的稳定源码接入包、离线演示参考包与只读标准窗口试读工具，见[稳定交接](docs/STABLE_HANDOFF.md)、[3号接入](docs/TEAM3_INTEGRATION.md)、[1号试读](docs/TEAM1_DATA_INTAKE.md)。最终包版本以MANIFEST.source_commit为准，验收以包旁机器回执为准。
+
+新解压目录无真实数据也可运行，不需要.git；从包根执行：
+
+```powershell
+$py = 'python' # 或自己的Python 3.11解释器完整路径
+& $py -X utf8 scripts/team3_run.py --python $py synthetic --out 'outputs/接入 01'
+```
+
+该命令依次完成基线规划、初始/故障独立评价及只读复查。输入/输出支持中文和空格路径，输出必须全新。没有依赖时先`python -m pip install -r requirements.txt`；本轮未执行干净安装。源码包不含真实数据；本地Demo/参考包仅由用户通过团队渠道转交。1号实际交付和3号本人确认仍待外部完成，转发草稿只写在[文档](docs/FORWARD_DRAFTS.md)，未发送。
+
+历史E5同初始计划对照172.4→182.0、收益9.6；历史E3/E4整体流程及Demo见对应交接。以下保留本机TLE入口示例，旧TLE数据/封存绝对路径不属于本轮移机验证范围。
 
 ## 直接运行
 
@@ -22,7 +33,7 @@ $py = 'D:\conda_envs\bd-fmb\python.exe'
 & $py -X utf8 -m pytest tests -q --basetemp=outputs/pytest_new_01
 ```
 
-已有 bd-fmb 环境不需要安装。最新94项测试通过，开发依赖固定pytest9.1.1；运行仅需requirements.txt。本轮未安装或升级依赖，未做干净环境安装验证。`requirements-lock.txt` 是用户原有完整环境快照，保持原字节和未跟踪状态。每次测试使用新的basetemp。
+已有 bd-fmb 环境不需要安装。稳定算法候选已有117项测试通过；本轮新增入口的最终测试数量见交付验收回执，开发依赖固定pytest9.1.1；运行仅需requirements.txt。本轮未安装或升级依赖，未做干净环境安装验证。`requirements-lock.txt` 是用户原有完整环境快照，保持原字节和未跟踪状态。每次测试使用新的basetemp。
 
 ## 交付与结果
 

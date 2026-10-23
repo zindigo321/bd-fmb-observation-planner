@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "data_version": "REPLACE_WITH_DELIVERY_VERSION",
+  "time_precision_s": 1,
+  "horizon_start_utc": "REPLACE_WITH_UTC_START",
+  "horizon_end_utc": "REPLACE_WITH_UTC_END",
+  "filters_applied": [],
+  "source": "REPLACE_WITH_SENDER_AND_PROVENANCE_RECORD",
+  "delivery_status": "PENDING_INPUT_TEMPLATE_ONLY"
+}

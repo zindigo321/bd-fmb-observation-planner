@@ -119,3 +119,13 @@ E5共同起点为OLD/E4的initial_frozen_baseline.json，初始173.2分、56目�
 E5本次实跑仍为基线172.4/改进182.0分、固定51.0、新任务121.4/131.0、收益9.6、覆盖56/60及56/56、净调整5/23、条件上界182。共同14完成/1锁定/1中断/2受影响未来，未来候选6839；原始TLE逐秒及两端零违例。两任务CSV与PREV字节一致，专用只读复核33文件/3目录不变。E3/E4重新运行4案例16计划，16任务CSV+4候选CSV与OLD逐字节一致。由新结果生成Demo并实际通过33项浏览器检查，三截图已查看。
 
 原始输入、三个旧封存源、OLD、PREV完整树（包括空目录）、requirements-lock.txt和.gitignore均不变。唯一台账control/run_ledger.json共15条外层命令，81.018276秒/600秒，余518.981724秒，全部按预期PASS；故意失败的反例/故障注入保留，没有把内部退出2或BLOCKED当作算法成功。未做新算法实验、环境安装、完整光学或正式评分；1号/3号仍待外部确认，旧额外复评BLOCKED。
+
+## 2026-10-23 新一轮：稳定交接与标准窗口试读准备
+
+从算法候选b0eb3b5建立work/stable-handoff-intake。新增便携team3_run、只读inspect_team1_input及按Git提交白名单导出的build_handoff；没有修改planner核心、调度、评分、独立校验、安全写入或默认算法。本轮产物根为outputs/stable_handoff_20261023_190522，唯一新600秒台账位于control/run_ledger.json，不借用旧轮余额。
+
+提交前本机已实际运行合成基线→初始任务评价→故障任务评价→只读复查：初始10.0分覆盖3/3，故障后3.0分覆盖1/3，均零违例，输入及结果完整树不变。试读入口已合法读取合成四文件与官方冻结参考四文件；后者60目标、3站、563窗口，短于120秒9条、能容纳120秒554条、240秒502条。这里只校验供应窗口，未重新传播轨道；读取成功不等于物理认证。来源BASE封存清单、历史任务/指标及Demo哈希已先行核对。
+
+最终源码包须在本次代码提交后按其Git对象制作，再解压到全新中文/空格目录实跑。最终包版本、大小与SHA256在packages/packages.json及包内MANIFEST；移目录/参考接入、浏览器、原117加新增测试、完整保护快照和实际预算由同根portable_validation.json、pytest.xml、acceptance.json及台账记录。这些发布验证发生在代码提交之后，不在本提交中预填未来PASS；交付回复给实际状态和失败记录。
+
+有限检查data/raw、data/processed及已指定交接资料未发现明确1号交付，实际试读PENDING_INPUT/NOT_RUN；3号本人确认PENDING_EXTERNAL。准备了接收清单、回执、元数据模板及给1/3/4号转发草稿，未发送任何消息。旧E3/E4、Demo、E5已完成，过期后续安排已更新。干净安装、全量TLE移机、完整光学和正式评分未验证，旧额外复评继续BLOCKED。详见docs/STABLE_HANDOFF.md及TEAM3_INTEGRATION.md、TEAM1_DATA_INTAKE.md。

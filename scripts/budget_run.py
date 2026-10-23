@@ -7,14 +7,29 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from planner.process_guard import run_guarded
+from planner.path_safety import guard_writes
 
 
 def stamp():
     return datetime.now(timezone(timedelta(hours=8))).isoformat()
 
 
-def execute(ledger_path, command, *, timeout=300, output=None, cwd=None):
+def ledger_targets(ledger_path,count=1):
+    path=Path(ledger_path).resolve()
+    ledger=json.loads(path.read_text(encoding='utf-8')) if path.exists() else dict(budget_seconds=600,entries=[])
+    if ledger['budget_seconds']!=600: raise ValueError('this round has a fixed 600-second budget')
+    if any(e.get('status')=='RUNNING' for e in ledger['entries']): raise ValueError('previous command unresolved; reconcile ledger before continuing')
+    targets=[path,path.with_suffix('.tmp')]
+    for i in range(len(ledger['entries'])+1,len(ledger['entries'])+1+count):
+        log=path.parent/f'command_{i:02d}.log'
+        if log.exists() or log.is_symlink(): raise ValueError('command log already exists: '+str(log))
+        targets.append(log)
+    return targets
+
+
+def execute(ledger_path, command, *, timeout=300, output=None, cwd=None, protected=()):
     ledger_path=Path(ledger_path).resolve()
+    guard_writes(ledger_targets(ledger_path),protected)
     ledger_path.parent.mkdir(parents=True,exist_ok=True)
     ledger=json.loads(ledger_path.read_text(encoding='utf-8')) if ledger_path.exists() else dict(budget_seconds=600,entries=[])
     if ledger['budget_seconds'] != 600: raise ValueError('this round has a fixed 600-second budget')
@@ -55,4 +70,6 @@ if __name__=='__main__':
     p.add_argument('--output'); p.add_argument('--cwd'); p.add_argument('command',nargs=argparse.REMAINDER)
     a=p.parse_args(); cmd=a.command[1:] if a.command[:1]==['--'] else a.command
     if not cmd: p.error('command required after --')
-    raise SystemExit(execute(a.ledger,cmd,timeout=a.timeout,output=a.output,cwd=a.cwd))
+    try: code=execute(a.ledger,cmd,timeout=a.timeout,output=a.output,cwd=a.cwd)
+    except (ValueError,OSError,KeyError,TypeError) as e: print('FAIL: '+str(e),file=sys.stderr);code=2
+    raise SystemExit(code)

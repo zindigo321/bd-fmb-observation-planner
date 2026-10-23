@@ -15,7 +15,7 @@ from planner.experiment_inputs import verify_seal
 from planner.path_safety import file_hash, guard_writes
 from planner.runner import versions
 
-TOP={'.gitignore','README.md','BASELINE_HANDOFF.md','EXPERIMENTS.md','PROGRESS.md','requirements.txt','requirements-dev.txt','smoke_test.py'}
+TOP={'.gitignore','.gitattributes','.editorconfig','CONTRIBUTING.md','README.md','BASELINE_HANDOFF.md','EXPERIMENTS.md','PROGRESS.md','requirements.txt','requirements-dev.txt','smoke_test.py'}
 SUFFIXES={'planner':{'.py'},'scripts':{'.py','.mjs'},'tests':{'.py'},'configs':{'.yaml','.json'},'docs':{'.md','.json','.yaml'}}
 
 

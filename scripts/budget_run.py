@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from planner.process_guard import run_guarded
 from planner.path_safety import guard_writes
+from planner.atomic_io import atomic_write_text
 
 
 def stamp():
@@ -19,6 +20,7 @@ def ledger_targets(ledger_path,count=1):
     ledger=json.loads(path.read_text(encoding='utf-8')) if path.exists() else dict(budget_seconds=600,entries=[])
     if ledger['budget_seconds']!=600: raise ValueError('this round has a fixed 600-second budget')
     if any(e.get('status')=='RUNNING' for e in ledger['entries']): raise ValueError('previous command unresolved; reconcile ledger before continuing')
+    # Keep the existing conservative alias preflight; saves never open this legacy name.
     targets=[path,path.with_suffix('.tmp')]
     for i in range(len(ledger['entries'])+1,len(ledger['entries'])+1+count):
         log=path.parent/f'command_{i:02d}.log'
@@ -48,8 +50,7 @@ def execute(ledger_path, command, *, timeout=300, output=None, cwd=None, protect
     def save():
         ledger['used_seconds']=sum(e['seconds'] for e in ledger['entries'])
         ledger['remaining_seconds']=max(0,600-ledger['used_seconds'])
-        tmp=ledger_path.with_suffix('.tmp')
-        tmp.write_text(json.dumps(ledger,ensure_ascii=False,indent=2),encoding='utf-8'); tmp.replace(ledger_path)
+        atomic_write_text(ledger_path,json.dumps(ledger,ensure_ascii=False,indent=2))
     save()
     started=time.perf_counter()
     try:

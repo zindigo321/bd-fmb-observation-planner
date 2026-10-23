@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.budget_run import execute,ledger_targets
 from planner.path_safety import guard_writes
+from planner.atomic_io import atomic_write_text
 import yaml
 
 
@@ -157,7 +158,7 @@ def summarize(out):
             '改进耗时包含内部基线回退成本。数据准备为封存窗口复用，不是冷启动轨道计算。校验耗时为该案例两方法合计。',
             '上界为初始候选中逐目标最高分之和，忽略站点冲突，不是普遍最优性结论或故障后精确上界。',
             '三样本仅描述性比较，不声称统计显著或正式赛事成绩。完整光学条件未验证。']
-    (out/'comparison.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    atomic_write_text(out/'comparison.md','\n'.join(lines)+'\n')
     json_write(out/'summary.json',dict(cases=cases,rows=rows,fairness=checks,sources_unchanged=sources_unchanged,
                acceptance=dict(algorithm_execution='PASS',independent_legality='PASS',history_preservation='PASS',
                                demo_data='NOT_RUN',browser_interaction='NOT_RUN',team_confirmation='PENDING_EXTERNAL',optional_evaluator='BLOCKED')))

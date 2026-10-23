@@ -1,0 +1,6 @@
+# Runtime versions verified in the existing bd-fmb environment.
+# requirements-lock.txt is the pre-existing, unmodified full environment snapshot.
+numpy==2.4.6
+skyfield==1.55
+sgp4==2.27
+PyYAML==6.0.3

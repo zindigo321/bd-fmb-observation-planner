@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "data_version": "synthetic_contract_example_v1_NOT_REAL_OBSERVATIONS",
+  "time_precision_s": 1,
+  "horizon_start_utc": "2026-08-03T06:00:00Z",
+  "horizon_end_utc": "2026-08-03T07:00:00Z",
+  "filters_applied": ["synthetic_intervals_no_physical_claim"],
+  "source": "Artificial test fixture; not teammate 1 data"
+}

@@ -70,4 +70,4 @@ TLE 兼容路径会解析 Alpha-5、审核优先级和站址、冻结样本、�
 & $py -X utf8 smoke_test.py --config configs/seed23.yaml --out outputs/seed23_delivery_01
 ```
 
-实际实验见 [EXPERIMENTS.md](EXPERIMENTS.md)。本轮停止于可交接基线。10 月 24 日在固定的多种子窗口上比较已有改进方法与基线，并制作故障前后演示；不扩大样本、不调用云端演化、不等优化才交基线。
+实际实验见 [EXPERIMENTS.md](EXPERIMENTS.md)。该段为原基线轮交付背景。此后E3/E4、Demo和E5已完成，历史记录保留；当前稳定接入以 [STABLE_HANDOFF.md](docs/STABLE_HANDOFF.md) 和 [TEAM3_INTEGRATION.md](docs/TEAM3_INTEGRATION.md) 为准，不再将这些实验列作未开始。

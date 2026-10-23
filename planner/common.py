@@ -24,6 +24,7 @@ import traceback
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from .atomic_io import atomic_text_writer, atomic_write_text
 from xml.etree import ElementTree
 import numpy as np
 import yaml
@@ -48,22 +49,14 @@ class BudgetExpired(RuntimeError):
 
 
 def json_write(path, obj):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + '.tmp')
-    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
-    tmp.replace(path)
+    atomic_write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 def csv_write(path, rows, fields):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + '.tmp')
-    with tmp.open('w', encoding='utf-8', newline='') as f:
+    with atomic_text_writer(path, newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
         writer.writeheader()
         writer.writerows(rows)
-    tmp.replace(path)
 
 
 def csv_tasks(path):

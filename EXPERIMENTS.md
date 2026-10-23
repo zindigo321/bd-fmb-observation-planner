@@ -107,3 +107,25 @@ E5共同起点为OLD/E4的initial_frozen_baseline.json，初始173.2分、56目�
 94项测试通过（原65＋路径14＋E5公平性/历史15），25.92秒；16项真实E5合法/攻击对照满足预期，攻击仅在完整副本/内存副本中进行，每项非法历史必须触发独立历史来源违例。专用E5只读复核重新传播TLE，33文件/3目录完整树及哈希不变。E3/E4新目录重跑4案例16计划，16任务CSV＋4候选CSV与旧交付字节一致。由新结果重新生成Demo，33项实际浏览器检查通过；旧Demo和OLD整个目录、三个原源、原始输入、环境清单及忽略规则前后不变。
 
 本轮20条外层串行命令152.042秒/600秒，余447.958秒；以run_ledger.json为唯一预算依据，复制夹具内旧台账已计入外层墙钟，不另加预算。修复前CLI的2退出码与污染如实保留，外层反例验证因符合缺陷预期而PASS。分项证据在acceptance.json，最后补充代码检查在final_code_checks.json。1号/3号仍待外部确认，旧额外复评BLOCKED；未运行可选第二共同初始起点、未重装环境、未做完整光学或正式评分。完整哈希、数据表、限制和命令见 [P1/E5交接](docs/PATH_SAFETY_E5_HANDOFF.md)。
+
+## 2026-10-23 新一轮：临时文件硬链接修复
+
+从b504f93新建work/atomic-write-hardening，本轮只修复I/O安全，未改算法。产物根目录 `outputs/atomic_write_fix_20261023_182047`；完整交接见 [ATOMIC_WRITE_FIX_HANDOFF.md](docs/ATOMIC_WRITE_FIX_HANDOFF.md)。以上历史记录保留。
+
+修复前，在全新合成夹具中以raw目录为保护对象，ledger.tmp与raw/input.txt实际samefile=true，预检ALLOWED；预算execute及run_improvement完整入口均返回2，输入却被改成台账JSON。反例命令、前后SHA和完整树保存于before_fix/reproduction.json。修复后通过同目录mkstemp独占创建临时文件，关闭后原子替换；相同反例安全完成台账保存，后续故意失败仍返回2，但原始输入、空目录和旧alias不变。JSON/CSV及重复汇总写入一并收口，不删除预植入普通文件/链接。
+
+117项测试通过（原94+新增23），0失败、0错误、0跳过，含真实Windows junction和硬链接。异常注入验证序列化、部分写入、fdopen、替换、清理失败，目标与输入保持；预算RUNNING/PASS/FAIL/BLOCKED和未完成拒绝语义保留。pytest 28.86秒，外层29.326782秒。JSON/CSV格式兼容，六个新封存目录无本次临时文件。
+
+E5本次实跑仍为基线172.4/改进182.0分、固定51.0、新任务121.4/131.0、收益9.6、覆盖56/60及56/56、净调整5/23、条件上界182。共同14完成/1锁定/1中断/2受影响未来，未来候选6839；原始TLE逐秒及两端零违例。两任务CSV与PREV字节一致，专用只读复核33文件/3目录不变。E3/E4重新运行4案例16计划，16任务CSV+4候选CSV与OLD逐字节一致。由新结果生成Demo并实际通过33项浏览器检查，三截图已查看。
+
+原始输入、三个旧封存源、OLD、PREV完整树（包括空目录）、requirements-lock.txt和.gitignore均不变。唯一台账control/run_ledger.json共15条外层命令，81.018276秒/600秒，余518.981724秒，全部按预期PASS；故意失败的反例/故障注入保留，没有把内部退出2或BLOCKED当作算法成功。未做新算法实验、环境安装、完整光学或正式评分；1号/3号仍待外部确认，旧额外复评BLOCKED。
+
+## 2026-10-23 新一轮：稳定交接与标准窗口试读准备
+
+从算法候选b0eb3b5建立work/stable-handoff-intake。新增便携team3_run、只读inspect_team1_input及按Git提交白名单导出的build_handoff；没有修改planner核心、调度、评分、独立校验、安全写入或默认算法。本轮产物根为outputs/stable_handoff_20261023_190522，唯一新600秒台账位于control/run_ledger.json，不借用旧轮余额。
+
+提交前本机已实际运行合成基线→初始任务评价→故障任务评价→只读复查：初始10.0分覆盖3/3，故障后3.0分覆盖1/3，均零违例，输入及结果完整树不变。试读入口已合法读取合成四文件与官方冻结参考四文件；后者60目标、3站、563窗口，短于120秒9条、能容纳120秒554条、240秒502条。这里只校验供应窗口，未重新传播轨道；读取成功不等于物理认证。来源BASE封存清单、历史任务/指标及Demo哈希已先行核对。
+
+最终源码包须在本次代码提交后按其Git对象制作，再解压到全新中文/空格目录实跑。最终包版本、大小与SHA256在packages/packages.json及包内MANIFEST；移目录/参考接入、浏览器、原117加新增测试、完整保护快照和实际预算由同根portable_validation.json、pytest.xml、acceptance.json及台账记录。这些发布验证发生在代码提交之后，不在本提交中预填未来PASS；交付回复给实际状态和失败记录。
+
+有限检查data/raw、data/processed及已指定交接资料未发现明确1号交付，实际试读PENDING_INPUT/NOT_RUN；3号本人确认PENDING_EXTERNAL。准备了接收清单、回执、元数据模板及给1/3/4号转发草稿，未发送任何消息。旧E3/E4、Demo、E5已完成，过期后续安排已更新。干净安装、全量TLE移机、完整光学和正式评分未验证，旧额外复评继续BLOCKED。详见docs/STABLE_HANDOFF.md及TEAM3_INTEGRATION.md、TEAM1_DATA_INTAKE.md。

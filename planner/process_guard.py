@@ -45,7 +45,7 @@ class WindowsJob:
 
 
 def run_guarded(command, *, timeout, log_path, cwd=None):
-    started=time.monotonic()
+    started=time.perf_counter()
     job=WindowsJob() if os.name=='nt' else None
     process=None
     timed_out=False
@@ -63,7 +63,7 @@ def run_guarded(command, *, timeout, log_path, cwd=None):
                 else: os.killpg(process.pid,signal.SIGKILL)
                 process.wait(timeout=10)
                 code=3
-        return dict(exit_code=code,timed_out=timed_out,seconds=time.monotonic()-started,
+        return dict(exit_code=code,timed_out=timed_out,seconds=time.perf_counter()-started,
                     tree_guard='Windows_Job_Object' if job else 'POSIX_process_group')
     finally:
         if job: job.close()

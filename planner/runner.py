@@ -58,8 +58,16 @@ def save_plan(out, name, tasks, report, total, executable):
 
 
 def run(config, out, clock):
+    run_started=time.perf_counter()
+    from .experiment_inputs import prepare_frozen, check_candidates, load_fixed_event, fault_impact, changes_by_target
+    reuse=None
     start=clock.begin('read_audit_and_freeze')
-    if config['input_mode']=='tle':
+    if config.get('reuse_source'):
+        records,stations,day,sample,metadata,windows,validator,errors,reuse=prepare_frozen(config,out,clock)
+        clock.end('read_audit_and_freeze',start,mode='sealed_source_reuse_including_TLE_validator_setup')
+        start=clock.begin('window_computation_or_cache')
+        clock.end('window_computation_or_cache',start,mode='reused_sealed_windows_no_window_propagation')
+    elif config['input_mode']=='tle':
         config.setdefault('frozen_sample',str(out/'frozen_sample.json'))
         records,stations,day,sample,audit=read_and_audit(config,out,clock)
         metadata=dict(data_version='official_fourth_problem_'+hashlib.sha256(json.dumps(sample['input_hashes'],sort_keys=True).encode()).hexdigest(),
@@ -84,10 +92,18 @@ def run(config, out, clock):
         clock.end('read_audit_and_freeze',start)
         start=clock.begin('window_computation_or_cache')
         clock.end('window_computation_or_cache',start,mode='provided_windows_no_propagation')
+        json_write(out/'cache.json',dict(hit=False,mode='provided_windows_no_propagation',cold_window_computation=False))
     export_tables(out/'standard_input',records,stations,windows,day,config['horizon_seconds'],metadata)
     json_write(out/'evaluation_context.json',dict(records=records,stations=stations,day=utc_at(day,0),sample=sample))
+    fixed_event=None
+    if config.get('fault_event_path'):
+        fixed_event,source_event=load_fixed_event(config['fault_event_path'],config['station_ids'],day,config['horizon_seconds'])
+        json_write(out/'event_provenance.json',dict(source_path=config['fault_event_path'],source_sha256=digest(config['fault_event_path']),
+                   source_event_annotations=source_event,physical_event=fixed_event,
+                   note='source task IDs describe source plan only; actual impacts are recomputed per method'))
     start=clock.begin('candidate_generation')
     candidates=make_candidates(windows,records,config,day,out,clock)
+    if reuse is not None: check_candidates(candidates,config,out,reuse)
     executable=len({c['satnum'] for c in candidates})
     clock.end('candidate_generation',start,candidates=len(candidates))
     methods=['baseline','improved'] if config['method']=='both' else [config['method']]
@@ -96,16 +112,20 @@ def run(config, out, clock):
         start=clock.begin('scheduling_'+method)
         plans[method]=schedule(candidates,method,clock=clock)
         clock.end('scheduling_'+method,start)
+        json_write(out/f'initial_frozen_{method}.json',plans[method])
     start=clock.begin('validation_initial')
     for method,tasks in plans.items():
         reports[method]=validator.check(tasks,label=method)
         metrics[method]=save_plan(out,method,tasks,reports[method],len(records),executable)
     clock.end('validation_initial',start)
-    event=select_fault(plans.get('improved',plans[methods[0]]),day,config['horizon_seconds'],config['fault_seconds'])
+    event=fixed_event or select_fault(plans.get('improved',plans[methods[0]]),day,config['horizon_seconds'],config['fault_seconds'])
     json_write(out/'fault_event.json',event)
+    impacts={method:fault_impact(initial,event) for method,initial in plans.items()} if event.get('effective') else {}
+    json_write(out/'fault_impacts.json',impacts)
     replans, histories = {}, {}
     if event.get('effective'):
         for method,initial in plans.items():
+            initial=json.loads((out/f'initial_frozen_{method}.json').read_text(encoding='utf-8'))
             start=clock.begin('replanning_'+method)
             completed,locked,interrupted,cancelled=replay_state(initial,event,day)
             fixed=completed+locked
@@ -113,13 +133,15 @@ def run(config, out, clock):
             histories[method]=dict(completed=completed,locked=locked,interrupted=interrupted,cancelled_future=cancelled)
             replans[method]=new
             json_write(out/f'history_{method}.json',histories[method])
+            json_write(out/f'changes_{method}.json',changes_by_target(initial,new))
             csv_write(out/f'interrupted_{method}.csv',[dict(r,target_id=r['satnum']) for r in interrupted],
                       ['target_id']+TASK_FIELDS+['planned_end_s','planned_duration_s','planned_end_utc'])
             clock.end('replanning_'+method,start)
         start=clock.begin('validation_replanned')
         for method,new in replans.items():
             name='replanned' if method=='improved' else 'baseline_replanned'
-            report=validator.check(new,histories[method]['interrupted'],event,label=name,original_plan=plans[method])
+            immutable_initial=json.loads((out/f'initial_frozen_{method}.json').read_text(encoding='utf-8'))
+            report=validator.check(new,histories[method]['interrupted'],event,label=name,original_plan=immutable_initial)
             metrics[name]=save_plan(out,name,new,report,len(records),executable)
         clock.end('validation_replanned',start)
     tests=None
@@ -129,14 +151,29 @@ def run(config, out, clock):
         tests=counterexample_tests(validator,plans[methods[-1]],day,event,out,clock)
         clock.end('legacy_negative_checks',start)
     pruning=json.loads((out/'candidate_pruning.json').read_text(encoding='utf-8'))
+    best={}
+    values={r['satnum']:{'high':5,'medium':3,'low':2}[r['priority']] for r in records}
+    for c in candidates:
+        point=values[c['satnum']]*(3 if c['duration_s']==120 else 5)
+        best[c['satnum']]=max(best.get(c['satnum'],0),point)
+    upper_bound=sum(best.values())
+    source_unchanged=True
+    if reuse is not None:
+        after=tree_hashes(Path(config['reuse_source']))
+        raw_after={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in Path(config['input_dir']).iterdir() if p.is_file()}
+        source_unchanged=after==reuse['source_hashes_before'] and raw_after==reuse['original_input_hashes']
+        reuse.update(source_hashes_after=after,source_unchanged=source_unchanged,raw_inputs_unchanged=raw_after==reuse['original_input_hashes'])
+        json_write(out/'input_reuse.json',reuse)
     passed=all(m['status']=='PASS' for m in metrics.values()) and not errors and (tests is None or tests['all_required_triggered'])
-    result=dict(status='PASS' if passed else 'FAIL',actual_execution=True,target_count=len(records),station_count=len(stations),
+    passed=passed and source_unchanged
+    result=dict(status='PASS' if passed else 'FAIL',actual_execution=True,seed=config['seed'],target_count=len(records),station_count=len(stations),
                 horizon_seconds=config['horizon_seconds'],window_count=len(windows),candidate_count=len(candidates),
                 raw_candidate_count=pruning['raw_grid_candidates'],executable_target_count=executable,
-                data_version=metadata['data_version'],plans=metrics,fault=event,propagation_error_count=len(errors),
-                fault_demo_status='PASS' if event.get('effective') and event.get('future_affected') and passed else 'BLOCKED',
+                data_version=metadata['data_version'],plans=metrics,fault=event,fault_impacts=impacts,propagation_error_count=len(errors),
+                candidate_upper_bound=dict(points_int=upper_bound,task_score=upper_bound/5,definition='sum of best points per target in initial candidates; ignores resource conflicts'),
+                fault_demo_status='PASS' if event.get('effective') and any(v['counts']['affected_future'] for v in impacts.values()) and passed else 'BLOCKED',
                 optional_evaluator=dict(status='BLOCKED',reason='legacy rule SHA256 and earliest_midpoint_prioritize_future contract mismatch; isolated'),
-                runtime=dict(seconds=time.monotonic()-clock.start,stages=clock.stages),
+                runtime=dict(seconds=time.perf_counter()-run_started,stages=clock.stages),
                 limitations=['smoke assumptions, not official scoring','optical conditions not independently verified'])
     json_write(out/'metrics.json',result)
     return 0 if passed else 2

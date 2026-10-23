@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "description": "Fixed E3/E4 inputs. No re-sampling or per-method event selection.",
+  "seeds": [
+    {"seed": 42, "source": "outputs/E0_seed42", "config": "configs/smoke.yaml"},
+    {"seed": 17, "source": "outputs/E2_seed17", "config": "configs/seed17.yaml"},
+    {"seed": 23, "source": "outputs/E2_seed23", "config": "configs/seed23.yaml"}
+  ],
+  "late_fault": "configs/late_fault.json"
+}

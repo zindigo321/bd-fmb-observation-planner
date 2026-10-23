@@ -1,6 +1,6 @@
 # bd-fmb-observation-planner
 
-百度伐谋杯第四题（开运联合）自主观测任务规划：可交接贪心基线、独立校验、站点故障重规划。本轮沿用原真实数据实现，修复历史伪造与复查覆盖问题，增加标准窗口表输入和可配置实验参数。
+百度伐谋杯第四题（开运联合）自主观测任务规划：可交接贪心基线、独立校验、站点故障重规划。最新交付继承已有改进方法，完成三个冻结种子的公平对比、较晚故障的历史保护验证及离线HTML回放。见 [E3/E4与Demo交接](docs/IMPROVEMENT_DEMO_HANDOFF.md)。
 
 ## 直接运行
 
@@ -16,14 +16,18 @@ $py = 'D:\conda_envs\bd-fmb\python.exe'
 Git 仓库不含真实比赛数据。已有本地 `prototype_v1/data_raw` 和冻结样本时可运行控制案例；新克隆先用合成示例：
 
 ```powershell
-python -m pip install -r requirements.txt
-python smoke_test.py --config configs/synthetic.yaml --out outputs/synthetic_01
-python -m pytest tests -q
+$py = 'D:\conda_envs\bd-fmb\python.exe'
+& $py -X utf8 -m pip install -r requirements-dev.txt
+& $py -X utf8 smoke_test.py --config configs/synthetic.yaml --out outputs/synthetic_01
+& $py -X utf8 -m pytest tests -q --basetemp=outputs/pytest_new_01
 ```
 
-已有 bd-fmb 环境不需要安装。测试需要 pytest；本轮未新增或升级依赖。`requirements-lock.txt` 是用户原有完整环境快照，保持原样且未纳入本轮提交。
+已有 bd-fmb 环境不需要安装。本轮65项测试通过，开发依赖固定pytest9.1.1；运行仅需requirements.txt。本轮未安装或升级依赖，未做干净环境安装验证。`requirements-lock.txt` 是用户原有完整环境快照，保持原字节和未跟踪状态。每次测试使用新的basetemp。
 
 ## 交付与结果
+
+- [docs/IMPROVEMENT_DEMO_HANDOFF.md](docs/IMPROVEMENT_DEMO_HANDOFF.md)：本轮E3/E4实测、600秒预算台账、复现/复查/Demo命令和分项验收。
+- [demo/README.md](demo/README.md)：离线生成器和清晰标注的合成演示；[中文讲稿](docs/DEMO_SCRIPT.md)。
 
 - [BASELINE_HANDOFF.md](BASELINE_HANDOFF.md)：安装、队友接入、独立评价及只读复查命令。
 - [docs/io_contract.md](docs/io_contract.md)：字段、端点、故障边界、评分和返回码。

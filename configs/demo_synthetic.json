@@ -1,0 +1,10 @@
+{
+  "cases": [
+    {
+      "id": "synthetic_contract",
+      "seed": 42,
+      "scenario": "early",
+      "directory": "outputs/demo_synthetic_run"
+    }
+  ]
+}

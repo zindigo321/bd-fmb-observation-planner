@@ -31,6 +31,9 @@ def main():
     parser.add_argument('--method',choices=['baseline','improved','both'])
     parser.add_argument('--input-dir')
     parser.add_argument('--input-mode',choices=['tle','windows'])
+    parser.add_argument('--reuse-source',help='sealed real run to reuse without re-sampling or orbit window calculation')
+    parser.add_argument('--fault-event',help='fixed physical event JSON for a normal run; separate from evaluation --event')
+    parser.add_argument('--budget-seconds',type=float,help='per-case cap, at most 300 seconds')
     parser.add_argument('--worker',action='store_true',help=argparse.SUPPRESS)
     args=parser.parse_args()
     out=Path(args.out or ('outputs/run_'+time.strftime('%Y%m%d_%H%M%S')+'_'+str(time.time_ns()%1000000))).resolve()
@@ -38,12 +41,18 @@ def main():
         if sum(bool(x) for x in [args.check_only,args.evaluate,args.optional_evaluator])>1:
             raise ValueError('select only one run mode')
         if args.check_only and not args.source: raise ValueError('--check-only requires --source')
+        if (args.reuse_source or args.fault_event) and (args.check_only or args.evaluate or args.optional_evaluator):
+            raise ValueError('--reuse-source/--fault-event are normal-run options only')
+        if args.event and not args.evaluate: raise ValueError('--event is evaluation-only; use --fault-event to inject a run event')
         c=normalize(yaml.safe_load(Path(args.config).read_text(encoding='utf-8')))
         for k in ('seed','method','input_dir','input_mode'):
             if getattr(args,k) is not None: c[k]=getattr(args,k)
+        if args.budget_seconds is not None: c['budget_seconds']=args.budget_seconds
+        if args.reuse_source: c['reuse_source']=str(Path(args.reuse_source).resolve())
+        if args.fault_event: c['fault_event_path']=str(Path(args.fault_event).resolve())
         c=normalize(c)
         read_paths=[Path(c['input_dir']),Path(args.config).resolve()]
-        for value in (args.source,args.evaluate,args.initial_plan,args.event,args.interrupted):
+        for value in (args.source,args.evaluate,args.initial_plan,args.event,args.interrupted,args.reuse_source,args.fault_event):
             if value: read_paths.append(Path(value).resolve())
         if c.get('frozen_sample'): read_paths.append(Path(c['frozen_sample']).resolve())
         cache=Path(c['cache_dir']).resolve()

@@ -1,0 +1,21 @@
+# Keep source text consistent across Windows and other systems.
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.mjs text eol=lf
+*.html text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=crlf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+
+# CSV keeps the existing text=auto behavior; do not renormalize old evidence.
+# Binary artifacts are never treated as source text.
+*.zip -text
+*.png -text
+*.jpg -text
+*.pdf -text

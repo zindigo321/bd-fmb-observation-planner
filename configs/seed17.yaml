@@ -1,0 +1,29 @@
+input_mode: tle
+input_dir: prototype_v1/data_raw
+seed: 17
+sample_counts:
+  high: 20
+  medium: 20
+  low: 20
+station_ids:
+- 1
+- 2
+- 3
+start_utc: '2026-08-03T00:00:00Z'
+horizon_seconds: 86400
+method: baseline
+budget_seconds: 300
+save_margin_seconds: 1
+cache_dir: outputs/window_cache
+coarse_step_seconds: 30
+fine_step_seconds: 1
+candidate_start_step_seconds: 30
+max_starts_per_window_duration: 12
+durations_seconds:
+- 120
+- 240
+switch_seconds: 30
+elevation_degrees:
+- 10
+- 85
+fault_seconds: 7200

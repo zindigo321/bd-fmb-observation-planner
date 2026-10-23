@@ -25,3 +25,5 @@ report/visualization/
 .vscode/
 Thumbs.db
 .DS_Store
+/_local/
+/requirements-lock.txt

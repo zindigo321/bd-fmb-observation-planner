@@ -70,6 +70,8 @@ if ($LASTEXITCODE -ne 0) { throw '故障评价未通过' }
 
 正常规划要注入固定故障，用`synthetic/windows --fault-event 文件`；外部故障评价用`evaluate --event 文件`。事件秒数相对配置UTC起点，字段见契约；不要混用两种参数。wrapper复用`smoke_test.py`，没有改评分或校验算法。
 
+`evaluate --config`也可读取成功运行的`run/effective_config.json`；`recheck`自动读取该文件。两种只读模式仅从内存中的执行配置移除历史规划用的`fault_event_path`，不修改源文件，也不重新注入故障。故障评价仍须显式提供初始计划、事件和中断表，复查仍校验源结果的封存证据。`reuse_source`和`frozen_sample`在所有标准窗口模式中继续拒绝；规划模式仍须用`--fault-event`显式注入。
+
 ## 5. 失败如何处理
 
 | 返回码 | 含义和动作 |

@@ -11,6 +11,8 @@
 
 每包内有MANIFEST.json，列出文件用途、来源、字节数、SHA256、创建时间、算法候选提交及源码提交、依赖版本。manifest明确排除自身哈希。压缩包旁另有`.zip.sha256`，校验归档本身。源码逐文件读取Git对象，不把未提交工作树冒充提交版本；本地包引用的旧实验时间不会改为本轮时间。
 
+源码白名单精确包含`.github/pull_request_template.md`和`.github/workflows/ci.yml`，未知受控文件仍使打包失败。打包回归测试创建临时Git仓库和合成历史来源，因此解压包运行测试无需自带`.git`或真实历史数据；本机需已有Git命令。修复后的新包仍须以最终本地提交实际导出，并通过包外验收回执记录结果；下文旧包路径与实测属于历史交接。
+
 ```powershell
 # PowerShell校验下载或转交后的压缩包
 Get-FileHash -Algorithm SHA256 .\source_kit.zip

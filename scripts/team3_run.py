@@ -51,8 +51,14 @@ def main():
             raise ValueError('fault evaluation requires initial-plan, event AND interrupted together')
         config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
         if config.get('input_mode') != 'windows': raise ValueError('portable workflow requires window-mode config; TLE replay uses the original documented entry')
-        if config.get('reuse_source') or config.get('frozen_sample') or config.get('fault_event_path'):
-            raise ValueError('window config must not carry frozen TLE/reuse/fault paths; pass --fault-event explicitly')
+        if config.get('reuse_source') or config.get('frozen_sample'):
+            raise ValueError('window config must not carry frozen TLE/reuse paths')
+        if a.mode in ('evaluate','recheck'):
+            # Historical injection is planning-only; keep the source config untouched.
+            # Evaluation uses explicit evidence; recheck uses the sealed source evidence.
+            config.pop('fault_event_path',None)
+        elif config.get('fault_event_path'):
+            raise ValueError('window planning config must not carry fault paths; pass --fault-event explicitly')
         config.update(input_dir=str(directory), cache_dir=str(out/'cache'), method=getattr(a,'method','baseline'))
         config = normalize(config)
         # A full tree snapshot also covers empty directories and aliases.

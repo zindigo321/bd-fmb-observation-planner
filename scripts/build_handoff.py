@@ -16,12 +16,13 @@ from planner.path_safety import file_hash, guard_writes
 from planner.runner import versions
 
 TOP={'.gitignore','.gitattributes','.editorconfig','CONTRIBUTING.md','README.md','BASELINE_HANDOFF.md','EXPERIMENTS.md','PROGRESS.md','requirements.txt','requirements-dev.txt','smoke_test.py'}
+GITHUB_FILES={'.github/pull_request_template.md','.github/workflows/ci.yml'}
 SUFFIXES={'planner':{'.py'},'scripts':{'.py','.mjs'},'tests':{'.py'},'configs':{'.yaml','.json'},'docs':{'.md','.json','.yaml'}}
 
 
 def source_allowed(name):
     p=PurePosixPath(name)
-    if name in TOP: return True
+    if name in TOP or name in GITHUB_FILES: return True
     if p.parts[0] in SUFFIXES: return p.suffix in SUFFIXES[p.parts[0]] and not any(x.startswith('.') or x=='__pycache__' for x in p.parts)
     return name in {'demo/README.md','demo/template.html'} or (p.parent.as_posix()=='examples/synthetic' and p.suffix in {'.csv','.json'})
 

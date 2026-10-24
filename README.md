@@ -58,6 +58,7 @@ python -X utf8 -m pytest tests -q --basetemp=outputs/pytest_01
 - [离线 Demo](demo/README.md)与[演示讲稿](docs/DEMO_SCRIPT.md)。
 - [E5受控对照](docs/PATH_SAFETY_E5_HANDOFF.md)、[多种子与较晚故障实验](docs/IMPROVEMENT_DEMO_HANDOFF.md)、[原子写入修复](docs/ATOMIC_WRITE_FIX_HANDOFF.md)。
 - [基线交接](BASELINE_HANDOFF.md)、[实验记录](EXPERIMENTS.md)、[进度记录](PROGRESS.md)、[团队待确认项](docs/team_questions.md)。
+-当前源码修复基线为 `0d6db405`，算法核心沿用既有候选；源码包精确来源以 `MANIFEST.source_commit` 为准。2026年10月24日固定数据冷生产、接入独立评价、演示与报告交付已完成本机审计，详见[当前状态](docs/CURRENT_STATUS.md)。用户已接管1/3/4号职责，未宣称外部成员或异机确认。第一轮原 `BLOCKED / strict FAIL` 与特定版本只读消费批准分别保留。旧额外复评继续[BLOCKED](docs/optional_evaluator.md)。
 
 历史E5让两种方法共享同一初始计划、事件、候选和历史，基线172.4分、改进182.0分，收益9.6分；覆盖均为56/60、可执行56/56，原始TLE逐秒独立检查零违例。结论限于该冻结场景。E3/E4比较的是完整流程，其不同初始计划下的收益不能当作纯重规划收益。
 
